@@ -1,0 +1,23 @@
+---
+title: "Interesting R Examples"
+author: "Sıla Aydın - IE582 - Fall 2018"
+---
+```{r,echo=FALSE,results="hide"}
+library(knitr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+```
+
+```{r,echo=FALSE,eval=FALSE}
+rmarkdown::render("/home/baydogan/Courses/IE582/Fall18/Guidelines/example_homework_0.Rmd",output_format="pdf_document")
+rmarkdown::render("/home/baydogan/Courses/IE582/Fall18/Guidelines/example_homework_0.Rmd",output_format="html_document")
+```
+
+1. [Exploring Survival on the Titanic](https://www.kaggle.com/mrisdal/exploring-survival-on-the-titanic)
+
+2. [Zillow Exploratory Analysis](https://www.kaggle.com/philippsp/exploratory-analysis-zillow)
+
+3. [Supercar Data Analysis](https://www.sharpsightlabs.com/blog/data-analysis-example-r-supercars-part1/)
+
+4. [Customer Analysis and Segmentation](http://rpubs.com/Ludovicbenistant/Customer_Analysis)
+
+5. [Predictive Maintenance](http://rpubs.com/Ludovicbenistant/predictive-maintenance)
