@@ -12,3 +12,7 @@
 ## Homework 2
 
 [Here](files/hw2_notebook.html) is my HW2 report
+
+## Homework 3
+
+[Here](files/hw3.html) is my HW2 report
