@@ -16,3 +16,7 @@
 ## Homework 3
 
 [Here](files/hw3.html) is my HW3 report
+
+## Homework 4
+
+[Here](files/hw4.html) is my HW4 report
