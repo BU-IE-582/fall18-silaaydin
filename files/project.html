@@ -376,13 +376,14 @@ $(document).ready(function () {
 <p>Points = 3*wins + ties</p>
 <p>We subtracted the Away team point from the Home team point and used the point difference as the feature.</p>
 <p>For the second one, we calculated the home and away performances of every team in the last 5 games they played. The calculation is basically the ratio of number of games won in home/away over 5. For example, if a team has won 3 games in the last 5 games they played in their home, the home performance rating is 0.60.</p>
+<p>We wanted to add a rating of bookmakers as a feature as well based on their historical performances but their performances were similar as mentioned above. All of the feature extraction is handled under one function called extract_features.openclose() and the codde is in the Appendix.</p>
 </div>
 <div id="models" class="section level3">
 <h3>Models</h3>
-<p>As a base model we used the penalized regression model that was given with the project. We compared the performances of the models we developed with this model.</p>
+<p>As a base model we used the penalized regression model that was given with the project. We compared the performances of the models we developed with this model. Initially we trained a k-nn model with cross validation but it performed poorly so we moved on to other models. You can find the code for the k-nn model in the Appendix.</p>
 <div id="svm-with-multiple-classes" class="section level4">
 <h4>SVM with Multiple Classes</h4>
-<p>First, we trained a multiple class Support Vector Machine with 10-fold cross calidation with 2 replications. To achieve this, we used the tunePareto() function in the package with the same name[5]. The tuning was done on 2 kernels; “gaussian” and “polynomial” and an interval of [0.01,2] for the cost parameter. The interval of the cost parameter is narrow because when we tried with wider intervals the computation time was too long and the best combinations had cost parameters less than 2. We did the submissions with the best model the “svm” generated. Although this model generated fairly good results its runtime was too high so we decided to try out a new model. The kernel and the cost parameter chosen for the test data is as follows:</p>
+<p>First, we trained a multiple class Support Vector Machine with 10-fold cross calidation with 2 replications. To achieve this, we used the tunePareto() function in the package with the same name[5]. The tuning was done on 2 kernels; “gaussian” and “polynomial” and an interval of [0.01,2] for the cost parameter. The interval of the cost parameter is narrow becaunse when we tried with wider intervals the computation time was too long and the best combinations had cost parameters less than 2. We did the submissions with the best model the “svm” generated. Although this model generated fairly good results its runtime was too high so we decided to try out a new model. The function that performs the svm for our model can be found in the appendix. The kernel and the cost parameter chosen for the test data is as follows:</p>
 <pre class="r"><code>pred_svm$bestcombinations</code></pre>
 <pre><code>## [[1]]
 ## [[1]]$cost
@@ -393,7 +394,7 @@ $(document).ready(function () {
 </div>
 <div id="ordered-logistic-regression" class="section level4">
 <h4>Ordered Logistic Regression</h4>
-<p>As our final model we decided to implement an ordinal regression model with the polr() function. The details of the final model and the logic behind it are explained below.</p>
+<p>As our final model we decided to implement an ordinal regression model with the polr() function. The details of the final model and the logic behind it are explained below. The code for the ordered logistic regression can be found in the Appendix.</p>
 <p>polr() function fits a Proportional Odds Logistic Model and we use the default method in the function whis is “logistic”. The formula of the fitted model is as follows [1]:</p>
 <p>logitP(Y&lt;=k|x)=Ak-n</p>
 <p>On the right side n represents a linear regression model with the coefficients and predictors and Ak is an intercept that changes depending on level k. Here k represents the levels of an ordered category [6]. In our case, we have 3 levels and k = 1 corresponds to “Home”. This function models the probability of being in category k or lower versus being in categories above it. In our example, P(Y&lt;=2) means the probability of match result being “Home” or “Tie” versus being “Away”.</p>
@@ -402,7 +403,7 @@ $(document).ready(function () {
 </div>
 <div id="results" class="section level2">
 <h2>Results</h2>
-<p>The following table illustrates the RPS values of three methods, namely support vector machines, penalized regression and ordinal regression, we used to perform our predictions and the RPS values of the bookmakers used in the model. As it can be seen, the final method we chose, “olr”, performs the best in terms of RPS values and all of the models developed outperform the bookmakers. (For the results here the test start date is 2018-12-29)</p>
+<p>The following table illustrates the RPS values of three methods, namely support vector machines, penalized regression and ordinal regression, we used to perform our predictions and the RPS values of the bookmakers included in the model. As it can be seen, the final method we chose, “olr”, performs the best in terms of RPS values and all of the models developed outperform the bookmakers. (For the results here the test start date is 2018-12-29)</p>
 <pre class="r"><code>meang</code></pre>
 <pre><code>##        approach       rps
 ##  1:         olr 0.1783926
@@ -426,7 +427,7 @@ $(document).ready(function () {
 </div>
 <div id="conclusions-and-future-work" class="section level2">
 <h2>Conclusions and Future Work</h2>
-<p>An ordinal regression model performed best in our case but as can be seen below when we calculated the p-values of the coefficients in the final model most of the variables turned out not to be significant at 0.05 level (only 8 out of 95 variables were significant). The sig value is 1 for the p-value&lt;0.05. We did not want to exclude variables or change our model because the RPS values are in favor of the model and this model was chosen with cross-validation.</p>
+<p>An ordinal regression model performed best in our case but as can be seen below when we calculated the p-values of the coefficients in the final model most of the variables turned out not to be significant at 0.05 level (only 8 out of 95 variables were significant). The sig value is 1 for the p-value&lt;0.05, and below are only the variables which are significant are listed. The coeff is the coefficients item in the final model generated by the ordered logistic regression. We did not want to exclude variables or change our model because the RPS values are in favor of the model and this model was chosen with cross-validation. Besides adding only one odd statistics (e.g. only odd1 of the opening odds for Pinnacle is significant) of a bookmaker and removing hers/his other odds is not meaningful.</p>
 <pre class="r"><code>coeff[sig == 1,]</code></pre>
 <pre><code>##          Value  Std. Error    t value       pvalue sig
 ## 1: -0.01870854 0.004572861  -4.091211 4.291259e-05   1
@@ -438,7 +439,7 @@ $(document).ready(function () {
 ## 7: -0.86681892 0.329512568  -2.630610 8.523188e-03   1
 ## 8:  0.36788216 0.183169875   2.008421 4.459861e-02   1
 ## 9: -2.13044057 0.780114295  -2.730934 6.315514e-03   1</code></pre>
-<p>For future works, firstly, the goodness of fit of the model and the significance of the variable can be more closely observed and maybe a better model can be found. Secondly, we can improve the quality of the feature the home/away performance of teams in the last 5 games that we created by selecting the best number of last matches to be used for the performance calculation by checking its effect on RPS.</p>
+<p>For future works, firstly, the goodness of fit of the model and the significance of the variables can be more closely observed and maybe a better model can be found. Secondly, we can improve the quality of the feature the home/away performance of teams in the last 5 games that we created by selecting the best number of last matches to be used for the performance calculation by checking its effect on RPS.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>
@@ -749,6 +750,7 @@ extract_features.openclose &lt;- function(matches,odd_details,pMissThreshold=0.0
   
   details = merge(matches[,-c('Home_Score','Away_Score','Total_Score','Result_Home','Result_Tie','Result_Away','type'),with=F],
                   details,by=&quot;matchId&quot;,all=T)
+  
   # details 1 is for rating the bookmakers based on their final odds
 
   details1 = dcast(feature_odd_details,matchId~paste0(&quot;tomelt_&quot;,oddtype)+bookmaker,value.var = c(&quot;Odd_Close&quot;))
@@ -896,56 +898,6 @@ RPS_matrix&lt;- function(probs,outcomes){
   final_result=data.table(test_features[,list(matchId,Match_Result)],predicted_probabilities[,new_order,1])
   
   return(list(predictions=final_result,cv_stats=cvResultsSummary))
-}
-
-train_knn&lt;-function(train_features, test_features,not_included_feature_indices=c(1:5), alpha=1,nlambda=50, tune_lambda=TRUE,nofReplications=2,nFolds=10,trace=T, kLevel=c(3:10)){
-  set.seed(1)
-  
-  # glmnet works with complete data
-  knn_features=train_features[complete.cases(train_features)]
-  knn_train_class=knn_features$Match_Result
-  knn_train_class = factor(knn_train_class, levels = c(&quot;Home&quot;, &quot;Tie&quot;, &quot;Away&quot;), labels = c(1:3))
-  knn_train_data=knn_features[,-not_included_feature_indices,with=F]
-  knn_test_data=test_features[,-not_included_feature_indices,with=F]
-  if(tune_lambda){
-    # to set lambda parameter, cross-validation will be performed and lambda is selected based on RPS performance
-    
-    cvindices=generateCVRuns(train_class,nofReplications,nFolds,stratified=TRUE)
-    cvresult2=data.table()
-    iter=1
-    for(i in 1:nofReplications) {
-      thisReplication=cvindices[[i]]
-      for(j in 1:nFolds){
-        for(k in kLevel){
-          testindices=thisReplication[[j]]
-          cvtrain=knn_train_data[-testindices]    
-          cvtrainclass=knn_train_class[-testindices]   
-          cvtest=knn_train_data[testindices]
-          cvtestclass=train_class[testindices] 
-          cv_knn_fit=kknn(cvtrainclass~.,as.data.frame(cvtrain),as.data.frame(cvtest),k=k,distance=2, kernel=&quot;optimal&quot;)
-          cvresult2=rbind(cvresult2, data.table(Replication=i,Fold=j, Klev=k,TestId=testindices, ProbHome=as.numeric(cv_knn_fit$prob[,1]),ProbTie=cv_knn_fit$prob[,2],ProbAway=cv_knn_fit$prob[,3],Result=train_class[testindices]))
-        }}}
-    
-    cvresult2[,pred_id:=1:.N]
-    outcome_for_rps_knn=data.table::dcast(cvresult2,pred_id~Result,value.var='pred_id')
-    outcome_for_rps_knn[,pred_id:=NULL]
-    outcome_for_rps_knn[is.na(outcome_for_rps_knn)]=0
-    outcome_for_rps_knn[outcome_for_rps_knn&gt;0]=1
-    setcolorder(outcome_for_rps,c('Home','Tie','Away'))
-    
-    #calculate RPS
-    overall_results_knn=data.table(cvresult2[,list(Replication,Fold,Klev)],RPS=RPS_matrix(cvresult2[,list(ProbHome,ProbTie,ProbAway)],outcome_for_rps_knn))
-    
-    # summarize performance for each k
-    overall_results_summary_knn=overall_results_knn[,list(RPS=mean(RPS)),list(Klev)]
-    
-    
-    cv_K_min=overall_results_summary_knn[which.min(RPS)]$Klev
-    
-  }
-  final_knn_fit=kknn(knn_train_class~., as.data.frame(knn_train_data),as.data.frame(knn_test_data),k=cv_K_min,distance = 2, kernel = &quot;optimal&quot;)
-  final_result_knn=data.table(test_features[,list(matchId,Match_Result)],final_knn_fit$prob)
-  return(list(predictions=final_result_knn, kLevel=cv_K_min, RPS=overall_results_summary_knn[which.min(RPS)]))
 }</code></pre>
 </div>
 <div id="support-vector-machine" class="section level3">
@@ -1047,6 +999,58 @@ train_knn&lt;-function(train_features, test_features,not_included_feature_indice
     z = rbind(z,data.table(bookmaker = i, RPS = mean(RPS_matrix(f[,6:8], f[, 10:12]))))
   }
   return(z)
+}</code></pre>
+</div>
+<div id="knn" class="section level3">
+<h3>KNN</h3>
+<pre class="r"><code>train_knn&lt;-function(train_features, test_features,not_included_feature_indices=c(1:5), alpha=1,nlambda=50, tune_lambda=TRUE,nofReplications=2,nFolds=10,trace=T, kLevel=c(3:10)){
+  set.seed(1)
+  
+  # glmnet works with complete data
+  knn_features=train_features[complete.cases(train_features)]
+  knn_train_class=knn_features$Match_Result
+  knn_train_class = factor(knn_train_class, levels = c(&quot;Home&quot;, &quot;Tie&quot;, &quot;Away&quot;), labels = c(1:3))
+  knn_train_data=knn_features[,-not_included_feature_indices,with=F]
+  knn_test_data=test_features[,-not_included_feature_indices,with=F]
+  if(tune_lambda){
+    # to set lambda parameter, cross-validation will be performed and lambda is selected based on RPS performance
+    
+    cvindices=generateCVRuns(train_class,nofReplications,nFolds,stratified=TRUE)
+    cvresult2=data.table()
+    iter=1
+    for(i in 1:nofReplications) {
+      thisReplication=cvindices[[i]]
+      for(j in 1:nFolds){
+        for(k in kLevel){
+          testindices=thisReplication[[j]]
+          cvtrain=knn_train_data[-testindices]    
+          cvtrainclass=knn_train_class[-testindices]   
+          cvtest=knn_train_data[testindices]
+          cvtestclass=train_class[testindices] 
+          cv_knn_fit=kknn(cvtrainclass~.,as.data.frame(cvtrain),as.data.frame(cvtest),k=k,distance=2, kernel=&quot;optimal&quot;)
+          cvresult2=rbind(cvresult2, data.table(Replication=i,Fold=j, Klev=k,TestId=testindices, ProbHome=as.numeric(cv_knn_fit$prob[,1]),ProbTie=cv_knn_fit$prob[,2],ProbAway=cv_knn_fit$prob[,3],Result=train_class[testindices]))
+        }}}
+    
+    cvresult2[,pred_id:=1:.N]
+    outcome_for_rps_knn=data.table::dcast(cvresult2,pred_id~Result,value.var='pred_id')
+    outcome_for_rps_knn[,pred_id:=NULL]
+    outcome_for_rps_knn[is.na(outcome_for_rps_knn)]=0
+    outcome_for_rps_knn[outcome_for_rps_knn&gt;0]=1
+    setcolorder(outcome_for_rps,c('Home','Tie','Away'))
+    
+    #calculate RPS
+    overall_results_knn=data.table(cvresult2[,list(Replication,Fold,Klev)],RPS=RPS_matrix(cvresult2[,list(ProbHome,ProbTie,ProbAway)],outcome_for_rps_knn))
+    
+    # summarize performance for each k
+    overall_results_summary_knn=overall_results_knn[,list(RPS=mean(RPS)),list(Klev)]
+    
+    
+    cv_K_min=overall_results_summary_knn[which.min(RPS)]$Klev
+    
+  }
+  final_knn_fit=kknn(knn_train_class~., as.data.frame(knn_train_data),as.data.frame(knn_test_data),k=cv_K_min,distance = 2, kernel = &quot;optimal&quot;)
+  final_result_knn=data.table(test_features[,list(matchId,Match_Result)],final_knn_fit$prob)
+  return(list(predictions=final_result_knn, kLevel=cv_K_min, RPS=overall_results_summary_knn[which.min(RPS)]))
 }</code></pre>
 </div>
 </div>
